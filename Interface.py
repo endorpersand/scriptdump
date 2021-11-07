@@ -87,10 +87,10 @@ def Interface(properties): # properties = set or function
             raise TypeError("Cannot delete interface properties")
 
         def __repr__(self):
-            paren_name = self.__class__.special_fmt("({})", "{}")
             props = ', '.join(f"{k}={v}" for k, v in self.__dict__.items())
-            return f"{paren_name}({props})"
+            return f"{self.__class__.__name__}({props})"
 
+    c.__name__ = c.ifname
     return c
 
 
