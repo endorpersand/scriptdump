@@ -1,3 +1,10 @@
+/*
+ * creation: February 18, 2021
+ *
+ * A list of length n, whose elements are f(i) for some defined function f
+ * I'm not sure this is very useful but here it is.
+ */
+
 type IndexFn<T> = (i: number) => T;
 type Mapper<T, R> = (n: T, i: number) => R;
 

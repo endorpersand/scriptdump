@@ -1,3 +1,10 @@
+"""
+creation: July 22-26, 2021
+
+System for calculating the optimal nuclear decay path for reactors in Omnifactory.
+Have fun looking at it!
+"""
+
 from dataclasses import dataclass
 from fractions import Fraction
 from numbers import Rational

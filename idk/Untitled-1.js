@@ -1,3 +1,9 @@
+/*
+ * creation: unknown
+ * 
+ * No clue. You're on your own.
+ */
+
 var owls = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40].reverse();
 var hours = 0;
 var iterate = choice => {

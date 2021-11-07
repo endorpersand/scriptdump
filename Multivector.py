@@ -1,5 +1,26 @@
-# Python 3.10
+"""
+creation: November 6, 2021
 
+Requires Python 3.10
+This allows you to do simple operations with multivectors!
+
+There's one function: Multivector(n)
+- Takes in a dimension (e.g. 2, 3) and gives you n basis vectors in a tuple
+- example: `e1, e2, e3 = Multivector(3)`
+- You can do algebra with those basis vectors!
+
+Supported operations:
+- Addition, subtraction
+- Geometric product (a * b)
+- Exterior product (a ^ b)
+- Scalar division
+
+If you'd like to experiment, `python3 -i Multivector.py` gives you 3 basis vectors (e1, e2, e3)
+You can also just import as a module (`from Multivector import *`)
+or... use a good GA library like clifford.
+"""
+
+__all__ = ("Multivector",)
 class _Blade:
         def __init__(self, ind: int, scale: int | float = 1):
             self.basis = ind
@@ -138,4 +159,5 @@ def Multivector(n: int):
         _MV._from_blade(_Blade(1 << i)) for i in range(n)
     )
 
-e1, e2, e3 = Multivector(3)
+if __name__ == "__main__":
+    e1, e2, e3 = Multivector(3)

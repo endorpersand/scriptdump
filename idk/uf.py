@@ -1,3 +1,9 @@
+"""
+creation: unknown
+
+Algo challenge? I'm not sure what this is for.
+"""
+
 s = '''\
 59
 73 41

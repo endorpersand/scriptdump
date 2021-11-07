@@ -1,3 +1,9 @@
+"""
+creation: unknown
+
+Conversion to and from continued fractions... and some other things?
+"""
+
 from itertools import accumulate
 from functools import reduce
 from fractions import Fraction

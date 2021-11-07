@@ -1,6 +1,33 @@
+"""
+creation: October 20, 2021
+
+Optional type (inspired by Rust & Java) in Python
+
+Creating Optionals
+- Optional(nullable_obj)
+- Optional.some(nonnull_obj)
+- Optional.none
+
+Optional operations
+- Optional(a) & Optional(b)    (a if a is none else b)
+- Optional(a) | Optional(b)    (a if a is some else b)
+- Optional(a) ^ Optional(b)    (returns which one is some, unless none or both are)
+- Optional(a).and_then(func)   (a if a is none else func(a))
+- Optional(a).or_else(func)    (a if a is some else func())
+- Optional(a)(*args)           (= Optional(a(*args)))
+- Optional(a).filter
+- Optional(a).map
+- Optional(a).get              (get value of a. error if null, unless there's a defined default)
+- iter(Optional(a))            (len 0 if none, len 1 if some)
+
+You can import these by module, or
+`python3 -i optional.py` to mess around with them in interactive mode
+"""
+
 from collections import defaultdict
 from typing import Generic, TypeVar, Callable
 
+__all__ = ("Optional",)
 T = TypeVar("T")
 U = TypeVar("U")
 
@@ -78,5 +105,8 @@ class Optional(Generic[T]):
         qualname = self.__class__.__qualname__
         if self.is_none(): return f"{qualname}.none"
         return f"{qualname}({self.obj})"
+    
+    def __bool__(self):
+        return self.is_some()
 
 Optional.none = Optional(None)

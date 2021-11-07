@@ -1,3 +1,17 @@
+"""
+creation: unknown
+
+Takes a skeleton chemical equation and adds coefficients to the compounds / formula units
+in order to balance the chemical equation.
+
+To run, `python3 balance.py`
+After the >>>, you can place a skeleton equation to balance.
+You can keep placing skeleton equations until the calculator crashes.
+
+You can also import the module (`from balance import *`) to get the balance function
+that does the balancing internally.
+"""
+
 import re
 from fractions import Fraction
 from itertools import chain
@@ -9,6 +23,7 @@ gcd = lambda args: reduce(lambda acc, cv: mgcd(acc, cv), args)
 lsub = lambda l1, l2: [l1[i] - l2[i] for i in range(len(l1))]
 lscale = lambda l, scalar: [elem * scalar for elem in l]
 
+__all__ = ('balance',)
 class Matrix:
     def __init__(self, l = [], r = None, c = None):
         self.l = l
@@ -106,9 +121,8 @@ def balance(eq):
     #print(mat)
     #print(count, keys)
 
-print(balance('K4Fe(SCN)6 + K2Cr2O7 + H2SO4 -> Fe2(SO4)3 + Cr2(SO4)3 + CO2 + H2O + K2SO4 + KNO3'))
-
 if __name__ == '__main__':
+    print(balance('K4Fe(SCN)6 + K2Cr2O7 + H2SO4 -> Fe2(SO4)3 + Cr2(SO4)3 + CO2 + H2O + K2SO4 + KNO3'))
     print(balance(input('Input unbalanced equation. \nex. ' + '\033[0;33m' + 'Cu + HNO3 -> Cu(NO3)2 + NO + H2O\n' + '\033[0m' + '>>> ')))
     while True:
         print(balance(input('>>> ')))

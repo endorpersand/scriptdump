@@ -1,3 +1,10 @@
+"""
+creation: Nov 29, 2020?
+
+I think this is supposed to modify functions, but it sucks.
+Maybe if I try this ever again, I could use ast. Or, I could also just never try this again!
+"""
+
 import inspect
 import re
 class _MuMod:

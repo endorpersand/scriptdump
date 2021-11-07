@@ -1,5 +1,8 @@
 """
-Tic Tac Toe Player
+creation: unknown
+
+Mancala game & AI
+Not sure if it still works
 """
 
 import math

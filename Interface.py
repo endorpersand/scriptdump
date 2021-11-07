@@ -1,3 +1,10 @@
+"""
+creation: February 16, 2021
+
+Implementation of very simple interfaces (inspired by TS) in Python
+
+"""
+
 from abc import ABCMeta
 import functools
 

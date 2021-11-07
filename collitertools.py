@@ -1,3 +1,13 @@
+"""
+creation: October 29, 2021
+
+itertools except: iterable parameters are collections, and the classes try to be as close as possible to collections
+I believe this is incomplete
+
+You can import these by module, or
+`python3 -i collitertools.py` to mess around with them in interactive mode
+"""
+
 from collections.abc import *
 import itertools
 import operator

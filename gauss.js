@@ -1,3 +1,9 @@
+/*
+ * creation: unknown
+ * 
+ * RREF calculator in JS
+ */
+
 class Matrix {
     constructor(arr) {
         this.value = arr;

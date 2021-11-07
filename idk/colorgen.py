@@ -1,3 +1,9 @@
+"""
+creation: December 22, 2020?
+
+idk
+"""
+
 from itertools import product
 from colorsys import rgb_to_hls
 from fractions import Fraction

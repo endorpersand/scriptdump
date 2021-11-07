@@ -1,3 +1,11 @@
+"""
+creation: unknown
+
+Encoding & decoding Vigenere
+
+there's also vigenereencrypt idk what that does
+"""
+
 from itertools import cycle
 
 def vigenere_cipher(msg, key):

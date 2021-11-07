@@ -1,3 +1,10 @@
+"""
+creation: unknown
+
+Calculates the sum 1^k + 2^k + ... n^k with time-complexity O(f(k)) (with some function f)
+Point is, it doesn't iterate from 1 to n, so large large large n's can be computed very quickly.
+"""
+
 from math import comb
 from fractions import Fraction
 
@@ -37,4 +44,5 @@ def sum_of_powers(n, e=1):
     coeffs = coeffs[-1]
     return sum(c * pow(n, i + 1) for i, c in enumerate(coeffs))
 
-print(sum_of_powers(100000000000000000000000, 30))
+if __name__ == "__main__":
+    print(sum_of_powers(100000000000000000000000, 30))

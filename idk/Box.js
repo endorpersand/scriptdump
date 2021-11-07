@@ -1,3 +1,12 @@
+/*
+ * creation: Nov 19, 2020?
+ *
+ * Dunno. I think I just went "what if primitive types were boxed in a way that could be accessible" 
+ * and then it spiraled out of control.
+ * Have a box and a bunch of random stuff under the box too.
+ */
+
+
 let ops = {
     "+": function (a, b) {return a.valueOf() + b.valueOf()},
     "-": function (a, b) {return a.valueOf() - b.valueOf()},

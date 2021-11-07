@@ -1,3 +1,9 @@
+"""
+creation: unknown
+
+Conversion to and from Roman numerals
+"""
+
 import re
 rmap = {
     "I": 1,

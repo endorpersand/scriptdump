@@ -1,3 +1,10 @@
+/*
+ * creation: unknown
+ *
+ * Creates random syllables that look Vietnamese
+ * yeah
+ */
+
 function vietRS() {
     let initials = [
             '', 'b', 'ch', 'd', 'đ', 'gi', 'h', 'kh', 'l', 'm', 'n', 'nh', 'ph', 'r', 's', 't', 'th', 'tr', 'v', 'x',
@@ -12,7 +19,7 @@ function vietRS() {
         finals = finals.flatMap(x => [x, '']);
     let peek = <T>(iter: ArrayLike<T>): T => iter[iter.length - 1];
     let diphables = (char: string): string[] => {
-        let canDiph = [];
+        let canDiph: string[] = [];
         if (!['ư','ươ','o','ô','u','uô'].includes(char)) canDiph.push('w_');
         if (['e','i','a'].includes(char)) canDiph.push('w_w');
         if (['a','ă','â'].includes(char)) canDiph.push('w_j');
@@ -23,7 +30,7 @@ function vietRS() {
     }
     let choose = <T>(iter: ArrayLike<T>): T => iter[Math.floor(Math.random() * iter.length)]; // [min, max)
     
-    let syllables = [];
+    let syllables: string[] = [];
     let sylcount = choose([1,1,1,2,2,3]);
     for (let i = 0; i < sylcount; i++) {
         let initial = choose(initials);

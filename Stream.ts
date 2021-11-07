@@ -1,3 +1,10 @@
+/*
+ * creation: February 13-15, 2021
+ *
+ * Implementation of Stream (from Java) in TS
+ * Not too interesting but I like the type stuff here
+ */
+
 type GeneratorFn<T> = (() => Generator<T>);
 type Streamable<T> = IterableIterator<T> | Iterable<T> | GeneratorFn<T> | Stream<T>;
 

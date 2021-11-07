@@ -1,3 +1,12 @@
+"""
+creation: unknown
+
+Conversion to and from continued fractions
+
+You can import these by module, or
+`python3 -i fracsimp.py` to mess around with them in interactive mode
+"""
+
 from fractions import Fraction
 from functools import reduce
 from decimal import Decimal

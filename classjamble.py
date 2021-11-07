@@ -1,3 +1,20 @@
+"""
+creation: March 18, 2021
+
+A buncha random things.
+- singleton: a class decorator that replaces the class with a singleton of the class
+- Universe: a random singleton. I think the idea was that it everything is in it?
+- CollectionMap: idk? It's a collection that is also mapped to an output collection? I guess??
+- chain: Delayed calling.
+    - `chain(f)(args)(more_args, kwargs="even!")()` runs `f(args, more_args, kwargs="even!")`
+    - chain is mutable though.
+- Implementation of optional chaining in python? Optional in optional.py is just better I think
+- dehex: idk
+- chunk: breaks up an iterable into iterables of len n
+
+You can import these by module, or
+`python3 -i classjamble.py` to mess around with them in interactive mode
+"""
 
 def singleton(cls):
     st = cls()

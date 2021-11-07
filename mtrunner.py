@@ -1,3 +1,10 @@
+"""
+creation: unknown
+
+Murder TWOW simulator. There's a killer and everyone who ranks below that killer is eliminated.
+Assuming the killer places randomly, how many rounds and two-player finales will there be per game?
+"""
+
 from random import randint
 from math import inf 
 runs = 1000000
