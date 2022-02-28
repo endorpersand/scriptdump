@@ -9,37 +9,40 @@ type GeneratorFn<T> = (() => Generator<T>);
 type Streamable<T> = IterableIterator<T> | Iterable<T> | GeneratorFn<T> | Stream<T>;
 
 class Stream<T> implements IterableIterator<T> {
-    private iterator: IterableIterator<T>;
+    #iterator: IterableIterator<T>;
 
     private constructor(iter?: IterableIterator<T>) {
         if (typeof iter === "undefined") {
-            this.iterator = [].values();
+            this.#iterator = Stream.emptyIterator();
         } else {
-            this.iterator = iter;
+            this.#iterator = iter;
         }
     }
 
     static of<T>(iter: Streamable<T>): Stream<T> {
+        return new Stream(Stream.intoIter(iter));
+    }
+
+    private static intoIter<T>(iter: Streamable<T>): IterableIterator<T> {
         if (iter instanceof Stream) {
-            return iter;
+            return iter.pop();
         }
+
         if (iter instanceof Function) {
-            return new Stream(iter());
+            return iter();
         }
 
         if ("next" in iter) {
-            return new Stream(iter);
+            return iter;
         }
 
-        return new Stream(
-            Object.assign(
+        return Object.assign(
                 iter[Symbol.iterator](), {
                     [Symbol.iterator]() {
                         return this;
                     }
                 }
-            )
-        );
+            );
     }
 
     static element<T>(item?: T): Stream<T> {
@@ -51,11 +54,15 @@ class Stream<T> implements IterableIterator<T> {
         return Stream.of(items);
     }
 
+    private static* emptyIterator() {
+        while (true) {
+            throw new TypeError("Cannot use consumed stream");
+        }
+    }
+
     private pop() {
-        let iter = this.iterator;
-        this.iterator = function* () {
-            while (true) throw new TypeError("Cannot use consumed stream");
-        }();
+        let iter = this.#iterator;
+        this.#iterator = Stream.emptyIterator();
         return iter;
     }
 
@@ -64,7 +71,7 @@ class Stream<T> implements IterableIterator<T> {
     }
 
     next() {
-        return this.iterator.next();
+        return this.#iterator.next();
     }
 
     [Symbol.iterator]() {
@@ -83,16 +90,12 @@ class Stream<T> implements IterableIterator<T> {
     }
 
     // lazy intermediate
-    flatMap<U>(callback: (item: T) => (U | Stream<U>)): Stream<U> {
+    flatMap<U>(callback: (item: T) => Streamable<U>): Stream<U> {
         function* iterator(iter: IterableIterator<T>) {
             for (let item of iter) {
-                let cb = callback(item);
-                if (cb instanceof Stream) {
-                    for (let cbi of cb) {
-                        yield cbi;
-                    }
-                } else {
-                    yield cb;
+                let cb = Stream.intoIter(callback(item));
+                for (let cbi of cb) {
+                    yield cbi;
                 }
             }
         }
@@ -114,14 +117,11 @@ class Stream<T> implements IterableIterator<T> {
     }
 
     // lazy generator
-    static concat<U>(...streams: (U|Stream<U>)[]): Stream<U> {
+    static concat<U>(...streamables: Streamable<U>[]): Stream<U> {
+        let iters = streamables.map(s => Stream.intoIter(s));
         function* iterator() {
-            for (let u of streams) {
-                if (u instanceof Stream) {
-                    for (let item of u.pop()) yield item;
-                } else {
-                    yield u;
-                }
+            for (let u of iters) {
+                for (let item of u) yield item;
             }
         }
 
@@ -129,12 +129,12 @@ class Stream<T> implements IterableIterator<T> {
     }
 
     // lazy generator
-    append<U>(...values: (U | Stream<U>)[]): Stream<T|U> {
+    append<U>(...values: Streamable<U>[]): Stream<T|U> {
         return Stream.concat<T|U>(this, ...values);
     }
 
     //lazy generator
-    prepend<U>(...values: (U|Stream<U>)[]): Stream<T|U> {
+    prepend<U>(...values: Streamable<U>[]): Stream<T|U> {
        return Stream.concat<T|U>(...values, this);
     }
 
@@ -169,8 +169,8 @@ class Stream<T> implements IterableIterator<T> {
     }
 
     // lazy terminal/intermediate
-    tee(n: number = 2): Stream<T>[] {
-        let lists = Array.from(Array(n), () => [] as T[]);
+    tee(length: number = 2): Stream<T>[] {
+        let lists: T[][] = Array.from({length}, () => []);
         let iter = this.pop();
         function* iterator(deque: T[]) {
             while (true) {
@@ -192,15 +192,8 @@ class Stream<T> implements IterableIterator<T> {
     }
 
     // lazy intermediate
-    enumerate() {
-        function* iterator(iter: IterableIterator<T>): Generator<[number, T]> {
-            let i = 0;
-            for (let item of iter) {
-                yield [i++, item];
-            }
-        }
-
-        return this.moveStream(iterator);
+    enumerate(start: number = 0) {
+        return Stream.zip(Stream.count(start), this);
     }
 
     // lazy intermediate
@@ -301,9 +294,8 @@ class Stream<T> implements IterableIterator<T> {
     
     // lazy generator
     // T: [A, B, C, D, ...], streamables: [Streamable<A>, Streamable<B>, Streamable<C>, Streamable<D>, ...]
-    static zip<T extends unknown[]>(...streamables: {[I in keyof T]: Stream<T[I]>}): Stream<T> {
-        let streams = streamables.map(s => Stream.of(s)) // streams: [Stream<A>, Stream<B>, Stream<C>, Stream<D>, ...]
-        let iters = streams.map(s => s.pop()) // iters: [IterableIterator<A>, IterableIterator<B>, IterableIterator<C>, IterableIterator<D>, ...]
+    static zip<T extends unknown[]>(...streamables: {[I in keyof T]: Streamable<T[I]>}): Stream<T> {
+        let iters = streamables.map(s => Stream.intoIter(s)); // iters: [IterableIterator<A>, IterableIterator<B>, IterableIterator<C>, IterableIterator<D>, ...]
         function* iterator() {
             let nv = iters.map(s => s.next()); // nv: [IteratorResult<A>, IteratorResult<B>, IteratorResult<C>, IteratorResult<D>, ...]
             
@@ -338,16 +330,19 @@ class Stream<T> implements IterableIterator<T> {
             e = stop;
         }
 
+        return Stream.count(b, step)
+            .takeWhile(i => i * Math.sign(step) < e * Math.sign(step));
+    }
+
+    static count(start: number = 0, step: number = 1) {
         return Stream.of(function*() {
-            let i = b;
+            let i = start;
             while (true) {
                 yield i;
                 i += step;
             }
         })
-        .takeWhile(i => i * Math.sign(step) < e * Math.sign(step));
     }
-
     // lazy intermediate
     repeat(n: number = Infinity) {
         function* iterator(iter: IterableIterator<T>) {
@@ -373,7 +368,7 @@ class Stream<T> implements IterableIterator<T> {
         return Stream.zip(this, Stream.of(iter))
             .flatMap(([t, i]) => 
                 Stream.element(t)
-                    .repeat(i)
+                    .repeat(+!!i)
             );
     }
 }
