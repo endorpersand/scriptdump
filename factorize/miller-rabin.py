@@ -7,9 +7,18 @@ https://en.wikipedia.org/wiki/Miller–Rabin_primality_test
 import math
 from enum import Enum, auto
 
-class MRResult(Enum):
-    CERTAIN = auto()
-    UNCERTAIN = auto()
+class PrimeResult(Enum):
+    CERTAIN_PRIME = auto()
+    CERTAIN_COMPOSITE = auto()
+    UNCERTAIN_PRIME = auto()
+    UNCERTAIN_COMPOSITE = auto()
+
+    @classmethod
+    def certain(cls, prime: bool) -> "PrimeResult":
+        return cls.CERTAIN_PRIME if prime else cls.CERTAIN_COMPOSITE
+    @classmethod
+    def uncertain(cls, prime: bool) -> "PrimeResult":
+        return cls.UNCERTAIN_PRIME if prime else cls.UNCERTAIN_COMPOSITE
 
 # def is_prime_slow(n: int) -> bool:
 #     if n < 2: return False
@@ -41,22 +50,24 @@ def mr_test(n: "int | tuple[int, int]", a: int) -> bool:  # type: ignore
         if x == n - 1: return True
     return False
 
-def is_prime(n: int) -> tuple[MRResult, bool]:
+def is_prime(n: int) -> PrimeResult:
     witnesses = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41)
     maximum = 3317044064679887385961981
 
-    if n in witnesses: return MRResult.CERTAIN, True
-    if n < 2: return MRResult.CERTAIN, False
-    if n % 2 == 0: return MRResult.CERTAIN, False
+    if n in witnesses: return PrimeResult.CERTAIN_PRIME
+    if n < 2: return PrimeResult.CERTAIN_COMPOSITE
+    if n % 2 == 0: return PrimeResult.CERTAIN_COMPOSITE
     
     r, d = decompose_n(n)
 
     result = all(mr_test((r,d), a) for a in witnesses)
     if result:
-        return (MRResult.CERTAIN if n < maximum else MRResult.UNCERTAIN,
-               result)
+        return (
+            PrimeResult.certain(result) if n < maximum 
+            else PrimeResult.uncertain(result)
+        )
 
-    return MRResult.CERTAIN, result
+    return PrimeResult.certain(result)
 
 
 ### FACTORIZATION
@@ -84,7 +95,7 @@ def is_prime(n: int) -> tuple[MRResult, bool]:
 #     if n != 1: factors.append(n)
 #     return tuple(factors)
 
-def factor(n: int, stop=1000000) -> tuple[tuple[int, ...], "tuple[MRResult, bool] | None"]:
+def factor(n: int, stop=1000000) -> tuple[tuple[int, ...], "PrimeResult | None"]:
     if 0 <= n < 2: return (n, ), None
 
     factors = []
