@@ -1,7 +1,8 @@
 """
 creation: Nov 28, 2021
 
-Prime factorization & is_prime checking
+Prime factorization & is_prime checking using Miller-Rabin
+https://en.wikipedia.org/wiki/Miller–Rabin_primality_test
 """
 import math
 from enum import Enum, auto
@@ -17,7 +18,6 @@ class MRResult(Enum):
 #     isq = math.isqrt(n)
 #     return all(n % i != 0 for i in range(3, isq + 1, 2))
 
-# https://en.wikipedia.org/wiki/Miller–Rabin_primality_test
 
 def decompose_n(n: int) -> tuple[int, int]:
     r, d = 0, n - 1
@@ -27,10 +27,10 @@ def decompose_n(n: int) -> tuple[int, int]:
     
     return (r, d)
 
-def mr_test(n: int, a: int) -> bool:
+def mr_test(n: "int | tuple[int, int]", a: int) -> bool:  # type: ignore
     if isinstance(n, tuple): 
         r, d = n
-        n = 2 ** r * d + 1
+        n: int = 2 ** r * d + 1
     else: 
         r, d = decompose_n(n)
     
