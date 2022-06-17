@@ -55,8 +55,8 @@ def is_prime(n: int) -> PrimeResult:
     maximum = 3317044064679887385961981
 
     if n in witnesses: return PrimeResult.CERTAIN_PRIME
-    if n < 2: return PrimeResult.CERTAIN_COMPOSITE
-    if n % 2 == 0: return PrimeResult.CERTAIN_COMPOSITE
+    if n < 2:          return PrimeResult.CERTAIN_COMPOSITE
+    if n % 2 == 0:     return PrimeResult.CERTAIN_COMPOSITE
     
     r, d = decompose_n(n)
 
