@@ -6,3 +6,4 @@ This folder contains absolute horrors of TypeScript scripts that run functions i
 
 - `derivative.ts`: Compile-time polynomial parser and derivative calculator
 - `fizzbuzz.ts`: Compile-time FizzBuzz
+- `bit.ts`: Bitwise operators... with types. Byte addition and multiplication too, heh.
