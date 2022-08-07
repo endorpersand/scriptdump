@@ -3,12 +3,6 @@
 use std::fmt::Display;
 
 #[derive(PartialEq, Eq, Clone)]
-enum Term {
-    Const(usize),
-    Symbol(Symbol)
-}
-
-#[derive(PartialEq, Eq, Clone)]
 struct Symbol(String);
 
 #[derive(PartialEq, Eq, Clone)]
@@ -16,7 +10,9 @@ enum Expr {
     Add(Vec<Expr>),
     Mul(Vec<Expr>),
     Pow(Box<Expr>, u32),
-    Term(Term)
+
+    Constant(usize),
+    Symbol(Symbol)
 }
 
 impl Expr {
@@ -32,7 +28,7 @@ impl Expr {
             });
         for e in exprs {
             match e {
-                Expr::Term(Term::Const(c)) => constant += c,
+                Expr::Constant(c) => constant += c,
                 other => final_exprs.push(other)
             }
         }
@@ -53,8 +49,8 @@ impl Expr {
             });
         for e in exprs {
             match e {
-                zero @ Expr::Term(Term::Const(0)) => return zero,
-                Expr::Term(Term::Const(c)) => coeff *= c,
+                zero @ Expr::Constant(0) => return zero,
+                Expr::Constant(c) => coeff *= c,
                 other => final_exprs.push(other)
             }
         }
@@ -64,7 +60,7 @@ impl Expr {
     }
 
     fn new_pow(expr: Expr, n: u32) -> Self {
-        if let Expr::Term(Term::Const(b)) = expr {
+        if let Expr::Constant(b) = expr {
             return Expr::new_const(b.pow(n));
         }
 
@@ -72,11 +68,11 @@ impl Expr {
     }
 
     fn new_const(n: usize) -> Self {
-        Self::Term(Term::Const(n))
+        Self::Constant(n)
     }
 
     fn new_sym(sym: &str) -> Self {
-        Self::Term(Term::Symbol(Symbol::new(sym)))
+        Self::Symbol(Symbol::new(sym))
     }
 }
 
@@ -88,15 +84,6 @@ impl Symbol {
 
 trait Derivable {
     fn derive(self, wrt: &Symbol) -> Expr;
-}
-
-impl Derivable for Term {
-    fn derive(self, wrt: &Symbol) -> Expr {
-        match self {
-            Term::Const(_) => Expr::new_const(0),
-            Term::Symbol(s) => s.derive(wrt)
-        }
-    }
 }
 
 impl Derivable for Expr {
@@ -131,7 +118,8 @@ impl Derivable for Expr {
                 Expr::new_pow(*e.clone(), c - 1),
                 e.derive(wrt)
             ]),
-            Expr::Term(t) => t.derive(wrt),
+            Expr::Constant(_) => Expr::new_const(0),
+            Expr::Symbol(s) => s.derive(wrt)
         }
     }
 }
@@ -142,35 +130,29 @@ impl Derivable for Symbol {
     }
 }
 
-impl Display for Term {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Term::Const(c) => write!(f, "{}", c),
-            Term::Symbol(s) => write!(f, "{}", s.0),
-        }
-    }
-}
-
 impl Display for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s: String = match self {
+        match self {
             Expr::Add(exprs) => {
-                exprs.iter()
+                let s = exprs.iter()
                      .map(|e| e.to_string())
                      .collect::<Vec<_>>()
-                     .join(" + ")
+                     .join(" + ");
+                
+                write!(f, "{}", s)
             },
             Expr::Mul(exprs) => {
-                exprs.iter()
+                let s = exprs.iter()
                      .map(|e| e.to_string())
                      .collect::<Vec<_>>()
-                     .join(" * ")
+                     .join(" * ");
+                
+                write!(f, "{}", s)
             },
-            Expr::Pow(e, p) => format!("{}^{}", e, p),
-            Expr::Term(t) => format!("{}", t),
-        };
-
-        write!(f, "{}", s)
+            Expr::Pow(e, p) => write!(f, "{}^{}", e, p),
+            Expr::Constant(c) => write!(f, "{}", c),
+            Expr::Symbol(s) => write!(f, "{}", s.0),
+        }
     }
 }
 
