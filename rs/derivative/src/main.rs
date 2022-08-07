@@ -19,15 +19,6 @@ enum Expr {
     Term(Term)
 }
 
-impl Term {
-    fn new_const(n: usize) -> Expr {
-        Expr::Term(Self::Const(n))
-    }
-    fn new_sym(sym: &str) -> Expr {
-        Expr::Term(Self::Symbol(Symbol::new(sym)))
-    }
-}
-
 impl Expr {
     fn new_add(exprs: Vec<Expr>) -> Self {
         let mut final_exprs = vec![];
@@ -46,7 +37,7 @@ impl Expr {
             }
         }
 
-        if constant != 0 { final_exprs.insert(0, Term::new_const(constant)) };
+        if constant != 0 { final_exprs.insert(0, Expr::new_const(constant)) };
         Self::Add(final_exprs)
     }
 
@@ -68,16 +59,24 @@ impl Expr {
             }
         }
 
-        if coeff != 1 { final_exprs.insert(0, Term::new_const(coeff)) };
+        if coeff != 1 { final_exprs.insert(0, Expr::new_const(coeff)) };
         Self::Mul(final_exprs)
     }
 
     fn new_pow(expr: Expr, n: u32) -> Self {
         if let Expr::Term(Term::Const(b)) = expr {
-            return Term::new_const(b.pow(n));
+            return Expr::new_const(b.pow(n));
         }
 
         Self::Pow(Box::new(expr), n)
+    }
+
+    fn new_const(n: usize) -> Self {
+        Self::Term(Term::Const(n))
+    }
+
+    fn new_sym(sym: &str) -> Self {
+        Self::Term(Term::Symbol(Symbol::new(sym)))
     }
 }
 
@@ -94,7 +93,7 @@ trait Derivable {
 impl Derivable for Term {
     fn derive(self, wrt: &Symbol) -> Expr {
         match self {
-            Term::Const(_) => Term::new_const(0),
+            Term::Const(_) => Expr::new_const(0),
             Term::Symbol(s) => s.derive(wrt)
         }
     }
@@ -128,7 +127,7 @@ impl Derivable for Expr {
                 Expr::new_add(terms)
             },
             Expr::Pow(e, c) => Expr::new_mul(vec![
-                Term::new_const(c as usize), 
+                Expr::new_const(c as usize), 
                 Expr::new_pow(*e.clone(), c - 1),
                 e.derive(wrt)
             ]),
@@ -139,7 +138,7 @@ impl Derivable for Expr {
 
 impl Derivable for Symbol {
     fn derive(self, wrt: &Symbol) -> Expr {
-        Term::new_const((&self == wrt) as usize)
+        Expr::new_const((&self == wrt) as usize)
     }
 }
 
@@ -180,17 +179,17 @@ fn main() {
 
     let e = Expr::new_add(vec![
         Expr::new_mul(vec![
-            Expr::new_pow(Term::new_const(4), 7),
-            Expr::new_pow(Term::new_sym("x"), 7)
+            Expr::new_pow(Expr::new_const(4), 7),
+            Expr::new_pow(Expr::new_sym("x"), 7)
         ]), 
         Expr::new_mul(vec![
-            Expr::new_pow(Term::new_const(4), 7),
-            Expr::new_pow(Term::new_sym("y"), 7)
+            Expr::new_pow(Expr::new_const(4), 7),
+            Expr::new_pow(Expr::new_sym("y"), 7)
         ]),
         Expr::new_mul(vec![
-            Term::new_sym("x"),
-            Term::new_sym("y"),
-            Term::new_sym("z")
+            Expr::new_sym("x"),
+            Expr::new_sym("y"),
+            Expr::new_sym("z")
         ]),
     ]);
 
