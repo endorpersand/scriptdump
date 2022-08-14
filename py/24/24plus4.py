@@ -46,6 +46,37 @@ BINOPS = {
     "^": rational_pow,
     "log": rational_log
 }
+B_INVERSES = {
+    "left": {
+        # a + X = c, X = c - a
+        "+":   lambda a, c: c - a,
+        # a - X = c, X = a - c
+        "-":   lambda a, c: a - c, 
+        # a * X = c, X = c / a
+        "*":   lambda a, c: rational_div(c, a),
+        # a / X = c, X = a / c
+        "/":   lambda a, c: rational_div(a, c),
+        # a ^ X = c, X = log_a(c)
+        "^":   lambda a, c: rational_log(a, c),
+        # log_a(X) = c, X = a^c
+        "log": lambda a, c: rational_pow(a, c)
+    },
+    "right": {
+        # X + a = c, X = c - a
+        "+":   lambda a, c: c - a,
+        # X - a = c, X = c + a
+        "-":   lambda a, c: c + a, 
+        # X * a = c, X = c / a
+        "*":   lambda a, c: rational_div(c, a),
+        # X / a = c, X = c * a
+        "/":   lambda a, c: c * a,
+        # X ^ a = c, X = c ^ (1/a)
+        "^":   lambda a, c: rational_pow(c, rational_div(1, a)),
+        # log_X(a) = c, X = a ^ (1/c)
+        "log": lambda a, c: rational_pow(a, rational_div(1, c))
+    },
+}
+
 PRINT = {
     "log": lambda a, b: f"log_{a}({b})",
 }
@@ -122,8 +153,40 @@ DIGITS = {
     8: "8",
     9: "9",
 }
-N_DIGITS = 4
+N_DIGITS = 4 # this has to be 4
 RESULT = 24
+
+def inverse(op, result, other, other_is_right):
+    inv = B_INVERSES["right" if other_is_right else "left"][op](other, result)
+    
+    oper = BINOPS[op]
+    if inv is not None:
+        valid_inv = (
+            (other_is_right and oper(inv, other) == result) or
+            (not other_is_right and oper(other, inv) == result)
+        )
+
+        if valid_inv: return inv
+
+INVERSE_MAP = {
+    "left": {
+        d: {
+            k: b 
+            for b in BINOPS
+            if (k := inverse(b, RESULT, d, False)) is not None
+        } 
+        for d in DIGITS
+    },
+    "right": {
+        d: {
+            k: b 
+            for b in BINOPS
+            if (k := inverse(b, RESULT, d, True)) is not None
+        } 
+        for d in DIGITS
+    }
+}
+
 
 def construct(digits: "tuple[int]", ops: "tuple[str]", order: "tuple[int]") -> Expr:
     refs = [*range(len(digits))]
@@ -145,10 +208,33 @@ def construct(digits: "tuple[int]", ops: "tuple[str]", order: "tuple[int]") -> E
     return vals[0]
 
 def exprs_of(digits):
-    n_ops = N_DIGITS - 1
+    [lother, *rest] = digits
+    rest_vals = INVERSE_MAP["left"][lother]
+
+    n_ops = N_DIGITS - 2
     for ops in itertools.product(BINOPS, repeat=n_ops):
         for order in itertools.permutations(range(n_ops), n_ops):
-            yield construct(digits, ops, order)
+            tree = construct(rest, ops, order)
+            
+            v = SExpr.simplify(tree)
+            if v in rest_vals:
+                yield Expr(rest_vals[v], [lother, tree])
+    
+    [*rest, rother] = digits
+    rest_vals = INVERSE_MAP["right"][rother]
+
+    n_ops = N_DIGITS - 2
+    for ops in itertools.product(BINOPS, repeat=n_ops):
+        for order in itertools.permutations(range(n_ops), n_ops):
+            tree = construct(rest, ops, order)
+            
+            v = SExpr.simplify(tree)
+            if v in rest_vals:
+                yield Expr(rest_vals[v], [tree, rother])
+    
+    [d1, d2, d3, d4] = digits
+    for [o1, o2, o3] in itertools.product(BINOPS, repeat=3):
+        yield Expr(o2, [Expr(o1, [d1, d2]), Expr(o3, [d3, d4])])
 
 def test_digits(digits):
     for tree in exprs_of(digits):
