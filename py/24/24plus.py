@@ -71,6 +71,19 @@ class Expr:
 
         return "{}({})".format(self.op, ','.join(estr(a) for a in self.args))
     
+    def __add__(self, other): return Expr("+", [self, other])
+    def __sub__(self, other): return Expr("-", [self, other])
+    def __mul__(self, other): return Expr("*", [self, other])
+    def __div__(self, other): return Expr("/", [self, other])
+    def __xor__(self, other): return Expr("^", [self, other])
+    def __pow__(self, other): return Expr("^", [self, other])
+    def __radd__(self, other): return Expr("+", [other, self])
+    def __rsub__(self, other): return Expr("-", [other, self])
+    def __rmul__(self, other): return Expr("*", [other, self])
+    def __rdiv__(self, other): return Expr("/", [other, self])
+    def __rxor__(self, other): return Expr("^", [other, self])
+    def __rpow__(self, other): return Expr("^", [other, self])
+    
 class SExpr(Expr):
     def __new__(cls, op, args):
         # simplify
