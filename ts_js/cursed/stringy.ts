@@ -36,16 +36,14 @@ type Digits = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 // Add two digits (optionally with carry), ranges from 0-19
-type _Carry<C extends boolean> = C extends true ? [0] : [];
 type _Add1<A extends number, B extends number, C extends boolean = false> = 
-    [...Digits[A], ...Digits[B], ..._Carry<C>]["length"] extends number ?
-        [...Digits[A], ...Digits[B], ..._Carry<C>]["length"]
+    [...Digits[A], ...Digits[B], ...(C extends true ? [0] : [])]["length"] extends (infer R extends number) ?
+        R
     : never;
 // Add an array of digits (optionally with a carry value)
 type _AddZ<A extends number[], B extends number[], C extends boolean = false> =
     A extends [...infer A1 extends number[], infer A2 extends number] ?
         B extends [...infer B1 extends number[], infer B2 extends number] ?
-            // Adding with carry
             SplitN<_Add1<A2, B2, C>> extends [...infer N1 extends number[], infer N2 extends number] ?
                 [..._AddZ<A1, B1, N1 extends [] ? false : true>, N2]
             : never
@@ -56,14 +54,10 @@ type _AddZ<A extends number[], B extends number[], C extends boolean = false> =
 type AddN<A extends number, B extends number> = ParseInt<DAToString<_AddZ<SplitN<A>, SplitN<B>>>>;
 type AddB<A extends bigint, B extends bigint> = ParseBigInt<DAToString<_AddZ<SplitN<A>, SplitN<B>>>>;
 type Add<A extends number | bigint, B extends number | bigint> =
-    A extends number ?
-        B extends number ?
-            AddN<A, B>
-        : never
-    : A extends bigint ?
-        B extends bigint ?
-            AddB<A, B>
-        : never
+    [A, B] extends [infer A extends number, infer B extends number] ?
+        AddN<A, B>
+    : [A, B] extends [infer A extends bigint, infer B extends bigint] ?
+        AddB<A, B>
     : never;
 // Doubling type
 type Double<A extends number | bigint> = Add<A, A>;
@@ -116,24 +110,26 @@ type Mul<A extends number | bigint, B extends number | bigint> =
     : Add<Mul<Double<A>, Half<B>>, A>;
 
 namespace Compare {
-    export type Le<A extends number, B extends number> =
+    export type Le<A extends number | bigint, B extends number | bigint> =
         never
 
-    export type Ge<A extends number, B extends number> =
+    export type Ge<A extends number | bigint, B extends number | bigint> =
         never
 
-    export type Eq<A extends number, B extends number> = 
+    export type Eq<A extends number | bigint, B extends number | bigint> = 
         A extends B ?
             B extends A ? true : false 
         : false;
 
-    export type Lt<A extends number, B extends number> =
+    export type Lt<A extends number | bigint, B extends number | bigint> =
         [Le<A, B>, Eq<A, B>] extends [true, false] ?
             true
         : false;
 
-    export type Gt<A extends number, B extends number> =
+    export type Gt<A extends number | bigint, B extends number | bigint> =
         [Ge<A, B>, Eq<A, B>] extends [true, false] ?
             true
         : false;
 }
+
+let q: Compare.Eq<Mul<293842234029374238n, 1028312038120131n>, 302161506560518335958659800585178n>;
