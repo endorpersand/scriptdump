@@ -35,7 +35,7 @@ type Digits = [
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
-// Add two digits (optionally with carry)
+// Add two digits (optionally with carry), ranges from 0-19
 type _Carry<C extends boolean> = C extends true ? [0] : [];
 type _Add1<A extends number, B extends number, C extends boolean = false> = 
     [...Digits[A], ...Digits[B], ..._Carry<C>]["length"] extends number ?
@@ -69,6 +69,7 @@ type Add<A extends number | bigint, B extends number | bigint> =
 type Double<A extends number | bigint> = Add<A, A>;
 
 type IsEven<N extends Stringable> = `${N}` extends `${string}${0 | 2 | 4 | 6 | 8}` ? true : false;
+type IsOdd<N extends Stringable> = IsEven<N> extends false ? true : false;
 
 type _HalfDS<D extends string, C extends boolean> =
     C extends true ?
@@ -89,7 +90,7 @@ type _HalfS<A extends string, C extends boolean = false> =
 A extends `${infer D}${infer R}` ? 
     [
         _HalfDS<D, C>,
-        ..._HalfS<R, IsEven<D> extends true ? false : true>
+        ..._HalfS<R, IsOdd<D>>
     ]
 : [];
 type HalfN<A extends number> = ParseInt<DAToString<_HalfS<`${A}`>>>;
@@ -113,3 +114,26 @@ type Mul<A extends number | bigint, B extends number | bigint> =
     : IsEven<B> extends true ?
         Mul<Double<A>, Half<B>>
     : Add<Mul<Double<A>, Half<B>>, A>;
+
+namespace Compare {
+    export type Le<A extends number, B extends number> =
+        never
+
+    export type Ge<A extends number, B extends number> =
+        never
+
+    export type Eq<A extends number, B extends number> = 
+        A extends B ?
+            B extends A ? true : false 
+        : false;
+
+    export type Lt<A extends number, B extends number> =
+        [Le<A, B>, Eq<A, B>] extends [true, false] ?
+            true
+        : false;
+
+    export type Gt<A extends number, B extends number> =
+        [Ge<A, B>, Eq<A, B>] extends [true, false] ?
+            true
+        : false;
+}
